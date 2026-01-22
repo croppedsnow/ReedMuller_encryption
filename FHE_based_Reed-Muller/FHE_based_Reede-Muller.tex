@@ -1,0 +1,272 @@
+%! Author = Ivan Chizhov
+%! Date = 08.11.2022
+
+% Preamble
+\documentclass[
+%toc,
+bib,
+%transition,
+%outline,
+%footcite,
+%minted
+]{../cmcbeamer}
+\uselanguage{Russian}
+\languagepath{Russian}
+\usepackage{blindtext}
+
+\graphicspath{{images/}{../images/}}
+
+\title{Полностью гомоморфное шифрование, основанное на кодах Рида-Маллера}
+\subtitle{Доклад}
+\author{%
+  Доледенок Илья Вадимович\\[\baselineskip]%\texorpdfstring{\\[\baselineskip]}{}
+  \makebox[6cm]{}
+  \parbox{0.3\textwidth}{
+    \fontsize{8}{10}\selectfont
+    \textit{%
+      Науч. рук.:\hfill \break%
+      Чижов Иван Владимирович,\hfill\break%
+      доцент кафедры ИБ ВМК МГУ,\hfill\break%
+      канд. физ.-мат. наук\hfill}
+  }
+}
+
+\institute[ВМК МГУ]{%
+  МГУ имени М.В.Ломоносова\\
+  факультет вычислительной математики и кибернетики\\
+  кафедра информационной безопасности
+}
+
+\date[]{\today}
+
+\subject{Доклад}
+
+
+% Document
+\begin{document}
+
+\section{Первый раздел}\label{sec:example:first}
+
+
+\begin{frame}\frametitle{Гомоморфное шифрование}
+
+  Гомоморфное шифрование отличается от обычного тем, что кроме алгоритмов
+  формирования ключей $KeyGen$, шифрования $Encrypt$,
+  расшифрования $Decrypt$,
+  у него еще есть алгоритм $Eval$ и некоторое допустимое множество операций $F$. 
+  Для каждой операции $f \in F$, и 
+  шифртекстов $c_1, \dots, c_n$, где $c_i = \mathrm{Encrypt}(m_i)$ 
+  выполняется: $\mathrm{Decrypt}(c) = f(m_1, \dots, m_n)$, 
+  где $c = \mathrm{Eval}(f, c_1, \dots, c_n)$.
+
+\end{frame}
+
+\begin{frame}\frametitle{Гомоморфное шифрование}
+  Гомоморфное шифрование разделяется на 3 типа:
+
+  \begin{itemize}
+
+  \item Частично гомоморфное, если поддерживается единственная операция
+  с бесконечным числом применений к данным
+  \item Ограниченно гомоморфное, если поддерживается произвольное количество
+  операций с конечным числом применений
+  \item Полностью гомоморфное, если поддерживается произвольное количество
+  операций с бесконечным числом применений
+  \end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Определения}
+
+  \begin{itemize}
+
+  \item Расстояние Хемминга $|v|$ для вектора $v \in \mathbb{F}^n_2$
+  это количество ненулевых элементов в $v$
+  \item Линейный $[n, k, d]$ код  $\mathcal{C}$ --- это k-размерное 
+  линейное подпространство $\mathbb{F}^n_2$ с минимальным расстоянием 
+  Хемминга равным d
+  \item Код Рида-Маллера $RM(r, m)$ --- это код порядка $r$ и длины $2^m$,
+  определяемый множеством всех векторов-значений 
+  булевых функций $f(v_1, \dots, v_m)$, задаваемых
+  многочленом Жегалкина степени не более r. 
+  \item Расширенный код Рида-Маллера --- это множество матриц 
+  $\{W_1, W_2, W_3, \dots\}$, где $W_i = m_i \odot G_{rm}, W_i \in 
+  (\mathbb{F}^n_2)^k, m_i \in \mathbb{F}^k_2,$ \\ $G_{rm} \in (\mathbb{F}^n_2)^k$ -
+  порождающая матрица кода $RM(r, m)$
+  \item Функция перестановки $\sigma_S$ --- это функция, переставляющая элементы
+  матрицы $V \in (\mathbb{F}^n_2)^k$ в соответствии с перестановочным ключом
+  $S \in (\mathbb{F}^n_{(x,y)})^k$, являющимся матрицей перетасованных пар
+  индексов $(x,y)$. То есть, если у нас есть матрица $V \in (\mathbb{F}^n_2)^k$, то
+  $W = \sigma_S(V)$ такова, что $W[i, j] = V[i', j']$, где $[i', j'] = S[i, j]$.
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Описание схемы}
+  \textbf{KeyGen}: $(r, m) \rightarrow K$\\
+
+  \begin{itemize}
+
+  \item Вычисляем $k = 1 + C^1_m + C^2_m + \cdots + C^r_m$\\
+    $n = 2^m$\\
+    $d = 2^{m - r}$
+  \item Выбираем $S_1 \subset {0, 1, \dots, n - 1}$ так, чтобы 
+  $\frac{d}{2} < |S_1| < d$ 
+  \item Выбираем ключ перестановки $S_2$ для функции $\sigma_{S_2}$
+  \item Выдаем секретный ключ $K = (S_1, S_2)$
+
+  \end{itemize}
+
+  \textbf{Encrypt}: $(K, m) \rightarrow C, m \in \mathbb{F}^k_2$\\
+
+  \begin{itemize}
+
+  \item Рандомно генерируем матрицу ошибок $E_{S_1} = (e_1, e_2, \dots, e_k):
+  e_i \in \mathbb{F}^n_2, supp(e_i) \subseteq S_1$
+  \item Вычисляем $C = \sigma_{S_2}(m \odot G_{rm} + E_{S_1})$
+  \item Выдаем шифртекст $C$
+  
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Описание схемы}
+  \textbf{Decrypt}: $(K, C) \rightarrow m$\\
+
+  \begin{itemize}
+    
+  \item Применяем обратную перестановку $\sigma'_{S_1}$ к 
+  $C: W = \sigma'_{S_1}(C) = m \odot G_{rm} + E_{S_1} = (w_1, w_2, \dots, w_k)$
+  \item $w = w_1 + w_2 + \cdots + w_k$
+  \item Мажоритарное декодирование вектора $w$ с известными местами ошибок:
+  $m = Decode(S_1, w)$
+  
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Метод Decode. Пример для RM(2, 4)}
+
+  \begin{columns}
+    \column{0.7\textwidth}
+
+    \begingroup
+    \renewcommand{\arraystretch}{0.8}
+    \definecolor{myred}{RGB}{255,131,127}
+    \definecolor{myblue}{RGB}{83, 166, 246}
+    \definecolor{mygreen}{RGB}{60, 151, 82}
+    \definecolor{mybrown}{RGB}{166, 96, 8}
+    \newcommand{\R}{\textcolor{myred}{\text{Кр}}}
+    \newcommand{\Bl}{\textcolor{myblue}{\text{С}}}
+    \newcommand{\G}{\textcolor{mygreen}{\text{З}}}
+    \newcommand{\Br}{\textcolor{mybrown}{\text{К}}}
+
+    $\begin{array}{c|*{16}{w{c}{0.4em}}}
+      & y_0 & y_1 & y_2 & y_3 & y_4 & y_5 & y_6 & y_7 & y_8 &
+      y_9 & y_{10} & y_{11} & y_{12} & y_{13} & y_{14} & y_{15} \\ \hline
+      1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\ \hline
+      v_1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+      v_2 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 \\
+      v_3 & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 \\
+      v_4 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 1 \\ \hline
+      v_1v_2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 \\
+      v_1v_3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 \\
+      v_1v_4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 1 \\
+      v_2v_3 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 \\
+      v_2v_4 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 \\
+      v_3v_4 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 \\ \hline
+      v_1v_2v_3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 \\
+      v_1v_2v_4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 \\
+      v_1v_3v_4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 \\
+      v_2v_3v_4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\ \hline
+      v_1v_2v_3v_4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+      & \R & \R & \R & \R & \G & \G & \G & \G & \Bl & \Bl &
+       \Bl & \Bl & \Br & \Br & \Br & \Br \\
+    \end{array}$  
+
+    \endgroup
+
+    \column{0.3\textwidth}
+
+    $w = (y_0, y_1, \dots, y_{15})$\\
+    $m = (x_0, x_1, x_2, x_3, x_4,$ \\$x_{12}, x_{13}, x_{14}, x_{23}, x_{24}, x_{34})$
+
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale=0.28]{hypercube.png}
+    \end{figure}
+
+\end{columns}
+\end{frame}
+
+\begin{frame}{Метод Decode. Алгоритм}
+
+  \begin{itemize}
+
+  \item Идем с конца сообщения m к началу. Пробегаемся по $s$ от $r$ до 0.
+  \item Перебираем все различные комбинации индексов $i_1, \dots, i_s$ и 
+  вычисляем $x_{i_1 \dots i_s}:$
+    \begin{itemize}
+    \item Находим все подкубы $B^s$ в гиперкубе $B^m$ такие, что в вершинах каждого из этих
+    подкубов координаты с индексами $i_1, \dots, i_s$ меняются, а все остальные не изменяются.
+    \item Перебираем эти кубы, пока не найдем тот куб $B'$, у которого нет пересечения между множеством
+    чисел в его вершинах с множеством $S_1$
+    \item Тогда $x_{i_1 \dots i_s} = \sum\limits_{j \in B'} y_j$
+    \end{itemize}
+  \item $w = w + \sum\limits_{i_1, \dots, i_s} G_{rm}[v_{i_1} \cdots v_{i_s}]$,
+  где $G_{rm}[v_{i_1} \cdots v_{i_s}]$ это строка, 
+  соответствующая одночлену $v_{i_1} \cdots v_{i_s}$
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Eval}
+  Поддерживается две операции. Пусть eсть два сообщения $m_1$ и $m_2$,
+  $c_i = Encrypt(m_i, K), i = 1,2$:
+
+  \begin{itemize}
+  \item Поэлементное сложение.\\
+  $m_3 = m_1 + m_2$, а $c_3 = Encode(m_3, K) = c_1 + c_2$
+  \item Поэлементное умножение.\\
+  $m_3 = m_1 \odot m_2$, а $c_3 = Encode(m_3, K)$ такова, что 
+  $c_3[i, j] = c_1[i, j] \cdot c_2[i, j]$ 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Время работы на практике}
+  Характеристики системы: процессор 11th Gen Intel(R) Core(TM) i5-11300H @ 3.10GHz, 
+  16 ГБ оперативной памяти, система Ubuntu 24.04.2 LTS. Программа написана на python
+  \bigskip
+
+  $\begin{array}{c|cccc}
+    (r, m) & \text{Шифрование} & \text{Расшифровка} & \text{Сумма} & \text{Произведение} \\ \hline
+    (1, 4) & 0.0000551919 & 0.0001657619 & 0.0000007483 & 0.0000006263 \\
+    (2, 5) & 0.0002487523 & 0.0006183957 & 0.0000010014 & 0.0000008491 \\
+    (1, 8) & 0.0010219483 & 0.0013443941 & 0.0000011781 & 0.0000013130 \\
+    (3, 8) & 0.0101977236 & 0.0126601022 & 0.0000027009 & 0.0000030117 \\
+    (1, 12) & 0.0241815319 & 0.0249023124 & 0.0000043755 & 0.0000050490 \\
+    (2, 12) & 0.1385504727 & 0.1482715894 & 0.0000287139 & 0.0000258685 \\
+    (1, 15) & 0.2254706886 & 0.2424323083 & 0.0000560185 & 0.0000570237 \\
+    (1, 18) & 2.1394342389 & 2.4840883483 & 0.0008174370 & 0.0007413267 \\
+  \end{array}$
+\end{frame}
+
+\begin{frame} \frametitle{Список литературы}
+
+  \begin{thebibliography}{9}
+
+    \bibitem{1} Ratnakumari Challa, VijayaKumari Gunta. 
+    \emph{A Modified Symmetric Key Fully Homomorphic Encryption Scheme Based on Reed-Muller Code.}
+    In: Bagdad Science Journal 18.2, 899–906 (2021).
+
+    \bibitem{2} Мак-Вильямс Ф.~Дж., Слоэн Н.~Дж.~А. 
+    \emph{Теория кодов, исправляющих ошибки.}
+    Пер. с англ. — М.: Связь, 1979. — 744~с.
+
+  \end{thebibliography}
+
+\end{frame}
+
+\end{document}
+
+
