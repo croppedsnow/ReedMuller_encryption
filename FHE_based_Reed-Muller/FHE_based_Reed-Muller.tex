@@ -92,11 +92,11 @@ bib,
   $\{W_1, W_2, W_3, \dots\}$, где $W_i = m_i \odot G_{rm}, W_i \in 
   (\mathbb{F}^n_2)^k, m_i \in \mathbb{F}^k_2,$ \\ $G_{rm} \in (\mathbb{F}^n_2)^k$ -
   порождающая матрица кода $RM(r, m)$
-  \item Функция перестановки $\sigma_S$ --- это функция, переставляющая элементы
+  \item Функция перестановки $\sigma_P$ --- это функция, переставляющая элементы
   матрицы $V \in (\mathbb{F}^n_2)^k$ в соответствии с перестановочным ключом
-  $S \in (\mathbb{F}^n_{(x,y)})^k$, являющимся матрицей перетасованных пар
+  $P \in (\mathbb{F}^n_{(x,y)})^k$, являющимся матрицей перетасованных пар
   индексов $(x,y)$. То есть, если у нас есть матрица $V \in (\mathbb{F}^n_2)^k$, то
-  $W = \sigma_S(V)$ такова, что $W[i, j] = V[i', j']$, где $[i', j'] = S[i, j]$.
+  $W = \sigma_P(V)$ такова, что $W[i, j] = V[i', j']$, где $[i', j'] = P[i, j]$.
 
   \end{itemize}
 \end{frame}
@@ -109,36 +109,36 @@ bib,
   \item Вычисляем $k = 1 + C^1_m + C^2_m + \cdots + C^r_m$\\
     $n = 2^m$\\
     $d = 2^{m - r}$
-  \item Выбираем $S_1 \subset {0, 1, \dots, n - 1}$ так, чтобы 
-  $\frac{d}{2} < |S_1| < d$ 
-  \item Выбираем ключ перестановки $S_2$ для функции $\sigma_{S_2}$
-  \item Выдаем секретный ключ $K = (S_1, S_2)$
+  \item Выбираем $S \subset {0, 1, \dots, n - 1}$ так, чтобы 
+  $\frac{d}{2} < |S| < d$ 
+  \item Выбираем ключ перестановки $P$ для функции $\sigma_{P}$
+  \item Выдаем секретный ключ $K = (S, P)$
 
   \end{itemize}
 
-  \textbf{Encrypt}: $(K, m) \rightarrow C, m \in \mathbb{F}^k_2$\\
+  \textbf{Encrypt}: $(K, mes) \rightarrow c, mes \in \mathbb{F}^k_2$\\
 
   \begin{itemize}
 
-  \item Рандомно генерируем матрицу ошибок $E_{S_1} = (e_1, e_2, \dots, e_k):
-  e_i \in \mathbb{F}^n_2, supp(e_i) \subseteq S_1$
-  \item Вычисляем $C = \sigma_{S_2}(m \odot G_{rm} + E_{S_1})$
-  \item Выдаем шифртекст $C$
+  \item Рандомно генерируем матрицу ошибок $E_S = (e_1, e_2, \dots, e_k):
+  e_i \in \mathbb{F}^n_2, supp(e_i) \subseteq S$
+  \item Вычисляем $c = \sigma_{S_2}(m \odot G_{rm} + E_S)$
+  \item Выдаем шифртекст $c$
   
   \end{itemize}
 
 \end{frame}
 
 \begin{frame}{Описание схемы}
-  \textbf{Decrypt}: $(K, C) \rightarrow m$\\
+  \textbf{Decrypt}: $(K, c) \rightarrow mes$\\
 
   \begin{itemize}
     
-  \item Применяем обратную перестановку $\sigma'_{S_1}$ к 
-  $C: W = \sigma'_{S_1}(C) = m \odot G_{rm} + E_{S_1} = (w_1, w_2, \dots, w_k)$
+  \item Применяем обратную перестановку $\sigma'_{S}$ к 
+  $c: W = \sigma'_S(c) = m \odot G_{rm} + E_S = (w_1, w_2, \dots, w_k)$
   \item $w = w_1 + w_2 + \cdots + w_k$
   \item Мажоритарное декодирование вектора $w$ с известными местами ошибок:
-  $m = Decode(S_1, w)$
+  $m = Decode(S, w)$
   
   \end{itemize}
 
@@ -151,14 +151,6 @@ bib,
 
     \begingroup
     \renewcommand{\arraystretch}{0.8}
-    \definecolor{myred}{RGB}{255,131,127}
-    \definecolor{myblue}{RGB}{83, 166, 246}
-    \definecolor{mygreen}{RGB}{60, 151, 82}
-    \definecolor{mybrown}{RGB}{166, 96, 8}
-    \newcommand{\R}{\textcolor{myred}{\text{Кр}}}
-    \newcommand{\Bl}{\textcolor{myblue}{\text{С}}}
-    \newcommand{\G}{\textcolor{mygreen}{\text{З}}}
-    \newcommand{\Br}{\textcolor{mybrown}{\text{К}}}
 
     $\begin{array}{c|*{16}{w{c}{0.4em}}}
       & y_0 & y_1 & y_2 & y_3 & y_4 & y_5 & y_6 & y_7 & y_8 &
@@ -179,8 +171,6 @@ bib,
       v_1v_3v_4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 \\
       v_2v_3v_4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\ \hline
       v_1v_2v_3v_4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
-      & \R & \R & \R & \R & \G & \G & \G & \G & \Bl & \Bl &
-       \Bl & \Bl & \Br & \Br & \Br & \Br \\
     \end{array}$  
 
     \endgroup
@@ -188,12 +178,24 @@ bib,
     \column{0.3\textwidth}
 
     $w = (y_0, y_1, \dots, y_{15})$\\
-    $m = (x_0, x_1, x_2, x_3, x_4,$ \\$x_{12}, x_{13}, x_{14}, x_{23}, x_{24}, x_{34})$
+    $mes = (x_0, x_1, x_2, x_3, x_4,$ \\$x_{12}, x_{13}, x_{14}, x_{23}, x_{24}, x_{34})$
+    \bigskip
 
-    \begin{figure}[H]
-      \centering
-      \includegraphics[scale=0.28]{hypercube.png}
-    \end{figure}
+    $x_{34} = y_0 + y_1 + y_2 + y_3 = y_4 + y_5 + y_6 + y_7 = 
+    y_8 + y_9 + y_{10} + y_{11} = y_{12} + y_{13} + y_{14} + y_{15}$
+    \bigskip
+
+    \begin{small}
+    $\{(\hat 0 \hat 0 00), (\hat 0 \hat 0 01),
+    (\hat 0 \hat 0 10), (\hat 0 \hat 0 11)\}$
+    $\{(\hat 0 \hat 1 00), (\hat 0 \hat 1 01),
+    (\hat 0 \hat 1 10), (\hat 0 \hat 1 11)\}$
+    $\{(\hat 1 \hat 0 00), (\hat 1 \hat 0 01),
+    (\hat 1 \hat 0 10), (\hat 1 \hat 0 11)\}$
+    $\{(\hat 1 \hat 1 00), (\hat 1 \hat 1 01),
+    (\hat 1 \hat 1 10), (\hat 1 \hat 1 11)\}$
+    \end{small}
+
 
 \end{columns}
 \end{frame}
@@ -206,10 +208,11 @@ bib,
   \item Перебираем все различные комбинации индексов $i_1, \dots, i_s$ и 
   вычисляем $x_{i_1 \dots i_s}:$
     \begin{itemize}
-    \item Находим все подкубы $B^s$ в гиперкубе $B^m$ такие, что в вершинах каждого из этих
-    подкубов координаты с индексами $i_1, \dots, i_s$ меняются, а все остальные не изменяются.
-    \item Перебираем эти кубы, пока не найдем тот куб $B'$, у которого нет пересечения между множеством
-    чисел в его вершинах с множеством $S_1$
+    \item Находим все различные множества, состоящих из всех тех чисел,
+    в которых, в бинарном представлении этих чисел, на всех местах
+    с индексами $i_1, \dots, i_s$ цифры меняются, а на остальных нет
+    \item Перебираем все эти множества, пока не найдем то, пересечение
+    которого с $S$ будет пустым.
     \item Тогда $x_{i_1 \dots i_s} = \sum\limits_{j \in B'} y_j$
     \end{itemize}
   \item $w = w + \sum\limits_{i_1, \dots, i_s} G_{rm}[v_{i_1} \cdots v_{i_s}]$,
@@ -226,7 +229,7 @@ bib,
 
   \begin{itemize}
   \item Поэлементное сложение.\\
-  $m_3 = m_1 + m_2$, а $c_3 = Encode(m_3, K) = c_1 + c_2$
+  $m_3 = m_1 + m_2$, то $c_3 = Encode(m_3, K) = c_1 + c_2$
   \item Поэлементное умножение.\\
   $m_3 = m_1 \odot m_2$, а $c_3 = Encode(m_3, K)$ такова, что 
   $c_3[i, j] = c_1[i, j] \cdot c_2[i, j]$ 
